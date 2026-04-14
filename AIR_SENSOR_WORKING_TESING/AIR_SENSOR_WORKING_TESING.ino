@@ -1,4 +1,4 @@
-#include <ModbusRTU.h>
+#include <ModbusRTU.h>// first version
 
 HardwareSerial ZphsSerial(PB7, PB6);
 HardwareSerial rs485Serial(PA3, PA2);
