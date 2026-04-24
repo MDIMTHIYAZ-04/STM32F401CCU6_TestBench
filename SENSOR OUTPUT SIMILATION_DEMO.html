@@ -1,0 +1,418 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Syne:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e2a;--bg4:#222736;
+  --green:#00e5a0;--red:#ff4d5e;--amber:#ffb84d;--blue:#4d9fff;
+  --text:#e8eaf0;--text2:#8890a8;--text3:#4a5068;
+  --border:#2a2f42;--border2:#353b55;
+}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);}
+.hmi{padding:14px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin-bottom:12px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.brand-name{font-size:13px;font-weight:700;letter-spacing:0.12em;}
+.brand-sub{font-size:10px;color:var(--text2);letter-spacing:0.06em;margin-left:4px;}
+.top-meta{display:flex;gap:8px;}
+.meta-chip{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:3px 8px;}
+.led-wrap{display:flex;align-items:center;gap:6px;}
+.led{width:8px;height:8px;border-radius:50%;transition:all 0.15s;}
+.led.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+.led.a{background:var(--amber);box-shadow:0 0 8px var(--amber);}
+.led.off{background:var(--border2);}
+.led-txt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.kpi-ok::before{background:var(--green);}
+.kpi.kpi-fault::before{background:var(--red);}
+.kpi.kpi-warn::before{background:var(--amber);}
+.kpi.kpi-blue::before{background:var(--blue);}
+.kpi.kpi-gray::before{background:var(--border2);}
+.kpi-label{font-size:9px;font-weight:600;letter-spacing:0.1em;color:var(--text2);margin-bottom:6px;}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;}
+.kpi-value.ok{color:var(--green);}
+.kpi-value.fault{color:var(--red);}
+.kpi-value.warn{color:var(--amber);}
+.kpi-value.blue{color:var(--blue);}
+.kpi-value.gray{color:var(--text2);}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.panel-title{font-size:10px;font-weight:700;letter-spacing:0.12em;color:var(--text2);}
+.panel-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:20px;}
+.badge-ok{background:#00e5a015;color:var(--green);border:1px solid #00e5a030;}
+.badge-fault{background:#ff4d5e15;color:var(--red);border:1px solid #ff4d5e30;}
+.badge-warn{background:#ffb84d15;color:var(--amber);border:1px solid #ffb84d30;}
+.reg-row{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:6px;margin-bottom:4px;background:var(--bg3);border:1px solid var(--border);transition:border-color 0.2s;}
+.reg-row.r-fault{border-color:#ff4d5e30;background:#ff4d5e08;}
+.reg-row.r-stale{border-color:var(--border);}
+.reg-left{display:flex;align-items:center;gap:8px;}
+.reg-num{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);min-width:28px;}
+.reg-nm{font-size:11px;color:var(--text2);}
+.fault-pip{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;}
+.ok-pip{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.stale-pip{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0;}
+.reg-right{display:flex;align-items:baseline;gap:4px;}
+.reg-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text);}
+.reg-val.v-fault{color:var(--red);}
+.reg-val.v-stale{color:var(--text3);}
+.reg-unit{font-size:9px;color:var(--text3);}
+.reg-raw{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);min-width:52px;text-align:right;}
+
+/* ── DIAGNOSTIC CARDS ── */
+.diag-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
+.diag-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.diag-title{font-size:9px;font-weight:700;letter-spacing:0.12em;color:var(--text2);margin-bottom:2px;}
+.diag-addr{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:10px;}
+.diag-main{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.diag-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);}
+
+/* binary visualiser */
+.bin-row{display:flex;gap:3px;margin-bottom:8px;align-items:flex-end;}
+.bit-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.bit-idx{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text3);}
+.bit-box{width:16px;height:16px;border-radius:3px;border:1px solid;display:flex;align-items:center;justify-content:center;}
+.bit-box-on-ok{background:#00e5a022;border-color:#00e5a055;}
+.bit-box-on-fault{background:#ff4d5e22;border-color:#ff4d5e55;}
+.bit-box-off{background:var(--bg3);border-color:var(--border);}
+.bit-inner{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;}
+.bit-inner-ok{color:var(--green);}
+.bit-inner-fault{color:var(--red);}
+.bit-inner-off{color:var(--text3);}
+.bit-sep{width:1px;height:16px;background:var(--border2);margin:0 2px;align-self:flex-end;}
+
+/* bit legend pills */
+.bits-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.bpill{font-size:9px;font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:20px;display:flex;align-items:center;gap:3px;}
+.bpill-ok{background:#00e5a012;color:var(--green);border:1px solid #00e5a025;}
+.bpill-fault{background:#ff4d5e12;color:var(--red);border:1px solid #ff4d5e25;}
+.bpill-off{background:var(--bg3);color:var(--text3);border:1px solid var(--border);}
+.bit-num-tag{font-size:8px;opacity:0.6;}
+
+.scene-section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;}
+.scene-hdr{font-size:9px;font-weight:700;letter-spacing:0.12em;color:var(--text2);margin-bottom:10px;}
+.scene-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-bottom:10px;}
+.sbtn{padding:6px 4px;font-size:10px;font-family:'JetBrains Mono',monospace;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.15s;text-align:center;line-height:1.3;}
+.sbtn:hover{border-color:var(--border2);color:var(--text);}
+.sbtn.s-ok{border-color:var(--green);color:var(--green);background:#00e5a010;}
+.sbtn.s-fault{border-color:var(--red);color:var(--red);background:#ff4d5e10;}
+.sbtn.s-warn{border-color:var(--amber);color:var(--amber);background:#ffb84d10;}
+.toggle-row{display:flex;align-items:center;gap:14px;}
+.tog-label{font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px;cursor:pointer;}
+.tog-label input{accent-color:var(--red);}
+.tog-head{font-size:9px;color:var(--text3);margin-right:4px;}
+.foot{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;}
+.foot-tx{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);}
+.foot-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+</style>
+
+<div class="hmi">
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dot" id="bd"></div>
+    <div>
+      <span class="brand-name">CARBELIM SENSOR GATEWAY</span>
+      <span class="brand-sub">STM32 Blue Pill · Slave ID 01 · RS-485 Modbus RTU</span>
+    </div>
+  </div>
+  <div class="top-meta">
+    <div class="meta-chip">9600 baud</div>
+    <div class="meta-chip">FC 03</div>
+    <div class="meta-chip">SR 2000ms</div>
+    <div class="meta-chip">19 regs</div>
+  </div>
+  <div class="led-wrap">
+    <div class="led g" id="led"></div>
+    <span class="led-txt" id="led-txt">running (1Hz)</span>
+  </div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi kpi-ok" id="kpi-state"><div class="kpi-label">DEVICE STATE</div><div class="kpi-value ok" id="kv-state">RUNNING</div></div>
+  <div class="kpi kpi-blue"><div class="kpi-label">UPTIME</div><div class="kpi-value blue" id="kv-up">0s</div></div>
+  <div class="kpi kpi-ok" id="kpi-age"><div class="kpi-label">DATA AGE</div><div class="kpi-value ok" id="kv-age">0</div></div>
+  <div class="kpi kpi-gray"><div class="kpi-label">TX COUNT</div><div class="kpi-value gray" id="kv-tx">0</div></div>
+  <div class="kpi kpi-gray"><div class="kpi-label">ERRORS</div><div class="kpi-value gray" id="kv-err">0</div></div>
+</div>
+
+<div class="scene-section">
+  <div class="scene-hdr">SIMULATION SCENARIOS</div>
+  <div class="scene-grid">
+    <div class="sbtn s-ok" id="sc-normal" onclick="setScenario('normal')">All OK</div>
+    <div class="sbtn" id="sc-warmup" onclick="setScenario('warmup')">Warmup</div>
+    <div class="sbtn" id="sc-tds" onclick="setScenario('tds')">TDS Fault</div>
+    <div class="sbtn" id="sc-ph" onclick="setScenario('ph')">pH Fault</div>
+    <div class="sbtn" id="sc-turb" onclick="setScenario('turb')">Turb Fault</div>
+    <div class="sbtn" id="sc-air" onclick="setScenario('air')">Air Fault</div>
+    <div class="sbtn" id="sc-adc" onclick="setScenario('adc')">ADC Fault</div>
+    <div class="sbtn" id="sc-all" onclick="setScenario('all')">All Faults</div>
+    <div class="sbtn" id="sc-recover" onclick="setScenario('recover')">Recovery</div>
+  </div>
+  <div class="toggle-row">
+    <span class="tog-head">MANUAL:</span>
+    <label class="tog-label"><input type="checkbox" id="f-ph" onchange="manualFault()">pH</label>
+    <label class="tog-label"><input type="checkbox" id="f-tds" onchange="manualFault()">TDS</label>
+    <label class="tog-label"><input type="checkbox" id="f-turb" onchange="manualFault()">Turb</label>
+    <label class="tog-label"><input type="checkbox" id="f-air" onchange="manualFault()">Air</label>
+    <label class="tog-label"><input type="checkbox" id="f-adc" onchange="manualFault()">ADC</label>
+  </div>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">WATER QUALITY — REG 00–02</span>
+      <span class="panel-badge badge-ok" id="wp-badge">ALL OK</span>
+    </div>
+    <div id="water-panel"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">AIR QUALITY (ZPHS01B) — REG 03–13</span>
+      <span class="panel-badge badge-ok" id="ap-badge">ALL OK</span>
+    </div>
+    <div id="air-panel"></div>
+  </div>
+</div>
+
+<div class="diag-row" id="diag-row"></div>
+
+<div class="foot">
+  <span class="foot-tx" id="ft-tx">Tx = 0 : Err = 0 : ID = 1 : F = 03 : SR = 2000ms</span>
+  <span class="foot-time" id="ft-time">—</span>
+</div>
+</div>
+
+<script>
+const FAULT=0xFFFF,STALE=0xFFFE;
+let S={faults:{ph:0,tds:0,turb:0,air:0,adc:0},warmup:false,uptime:0,dataAge:0,tx:0,err:0,scenario:'normal',ledOn:false,recovering:false,recoverStep:0};
+let base={turb:1230,ph:797,tds:4502,pm1:19,pm25:24,pm10:26,co2:411,voc:3,temp:242,hum:68,ch2o:17,co:5,o3:6,no2:57};
+const j=(v,p)=>Math.round(v*(1+(Math.random()-.5)*p));
+
+function getRegs(){
+  const f=S.faults;
+  if(S.warmup)return Array(19).fill(STALE);
+  const r={};
+  r[0]=f.turb||f.adc?FAULT:j(base.turb,.05);
+  r[1]=f.ph||f.adc?FAULT:j(base.ph,.02);
+  r[2]=f.tds||f.adc?FAULT:j(base.tds,.04);
+  if(f.air){for(let i=3;i<=13;i++)r[i]=FAULT;}
+  else{r[3]=j(base.pm1,.1);r[4]=j(base.pm25,.1);r[5]=j(base.pm10,.1);r[6]=j(base.co2,.02);r[7]=base.voc;r[8]=j(base.temp,.01);r[9]=j(base.hum,.02);r[10]=j(base.ch2o,.05);r[11]=j(base.co,.05);r[12]=j(base.o3,.05);r[13]=j(base.no2,.03);}
+  let st=0;const run=!(f.ph||f.tds||f.turb||f.air||f.adc);
+  if(!f.air)st|=1;if(!f.ph)st|=2;if(!f.tds)st|=4;if(!f.turb)st|=8;if(!f.adc)st|=16;if(run)st|=128;
+  r[14]=st;r[15]=S.uptime&0xFFFF;r[16]=(S.uptime>>16)&0xFFFF;r[17]=S.dataAge;
+  let fc=0;if(f.ph)fc|=1;if(f.tds)fc|=2;if(f.turb)fc|=4;if(f.air)fc|=8;if(f.adc)fc|=16;
+  r[18]=fc;return r;
+}
+
+const wDefs=[{a:0,n:'Turbidity',div:10,u:'NTU'},{a:1,n:'pH',div:100,u:'pH'},{a:2,n:'TDS',div:10,u:'ppm'}];
+const aDefs=[
+  {a:3,n:'PM1.0',div:1,u:'µg/m³'},{a:4,n:'PM2.5',div:1,u:'µg/m³'},{a:5,n:'PM10',div:1,u:'µg/m³'},
+  {a:6,n:'CO₂',div:1,u:'ppm'},{a:7,n:'VOC index',div:1,u:'idx'},{a:8,n:'Temperature',div:10,u:'°C'},
+  {a:9,n:'Humidity',div:1,u:'%'},{a:10,n:'Formaldehyde',div:1000,u:'mg/m³'},
+  {a:11,n:'CO',div:10,u:'ppm'},{a:12,n:'O₃ Ozone',div:100,u:'ppm'},{a:13,n:'NO₂',div:100,u:'ppm'}
+];
+
+function regRow(def,val){
+  const isFault=val===FAULT,isStale=val===STALE;
+  const rowCls=isFault?'reg-row r-fault':isStale?'reg-row r-stale':'reg-row';
+  const valCls=isFault?'reg-val v-fault':isStale?'reg-val v-stale':'reg-val';
+  const pip=isFault?'fault-pip':isStale?'stale-pip':'ok-pip';
+  const display=isFault?'FAULT':isStale?'—':(val/def.div).toFixed(def.div>=100?2:def.div>=10?1:0);
+  const rawStr=isFault?'0xFFFF':isStale?'0xFFFE':val;
+  return `<div class="${rowCls}"><div class="reg-left"><span class="reg-num">R${String(def.a).padStart(2,'0')}</span><span class="reg-nm">${def.n}</span><div class="${pip}"></div></div><div class="reg-right"><span class="${valCls}">${display}</span><span class="reg-unit">${isFault||isStale?'':def.u}</span><span class="reg-raw">${rawStr}</span></div></div>`;
+}
+
+/* ── binary visualiser with bit indices ── */
+function binVisual(val, bitDefs, isOkRegister){
+  // bitDefs = [{b:bitNum, l:label, important:bool}]
+  // renders bits 7 down to 0, highlights only defined bits
+  const definedBits=new Set(bitDefs.map(x=>x.b));
+  const labelMap={};bitDefs.forEach(x=>labelMap[x.b]=x.l);
+
+  let html='<div class="bin-row">';
+  // bits 7..0
+  for(let b=7;b>=0;b--){
+    const set=(val>>b)&1;
+    const defined=definedBits.has(b);
+    let boxCls,innerCls;
+    if(!defined){boxCls='bit-box bit-box-off';innerCls='bit-inner bit-inner-off';}
+    else if(isOkRegister){
+      boxCls=set?'bit-box bit-box-on-ok':'bit-box bit-box-on-fault';
+      innerCls=set?'bit-inner bit-inner-ok':'bit-inner bit-inner-fault';
+    } else {
+      // fault register: set = bad
+      boxCls=set?'bit-box bit-box-on-fault':'bit-box bit-box-on-ok';
+      innerCls=set?'bit-inner bit-inner-fault':'bit-inner bit-inner-ok';
+    }
+    html+=`<div class="bit-block"><span class="bit-idx">b${b}</span><div class="${boxCls}"><span class="${innerCls}">${set}</span></div></div>`;
+    if(b===4) html+='<div class="bit-sep"></div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+/* ── bit legend pills with bit number tag ── */
+function bitPills(val, bitsArr, inv){
+  return bitsArr.map(b=>{
+    const set=(val>>b.b)&1;
+    const ok=inv?!set:!!set;
+    return `<span class="bpill ${ok?'bpill-ok':'bpill-fault'}"><span class="bit-num-tag">b${b.b}</span>${b.l}</span>`;
+  }).join('');
+}
+
+function renderDiag(regs){
+  const st=regs[14],fc=regs[18],age=regs[17],up=(regs[16]<<16)|regs[15];
+
+  // STATUS bits — set = healthy
+  const bits14=[
+    {b:7,l:'Running'},
+    {b:4,l:'ADC OK'},
+    {b:3,l:'Turb OK'},
+    {b:2,l:'TDS OK'},
+    {b:1,l:'pH OK'},
+    {b:0,l:'Air OK'}
+  ];
+  // FAULT CODE bits — set = fault
+  const bits18=[
+    {b:4,l:'ADC'},
+    {b:3,l:'Air'},
+    {b:2,l:'Turb'},
+    {b:1,l:'TDS'},
+    {b:0,l:'pH'}
+  ];
+
+  const stHex='0x'+st.toString(16).toUpperCase().padStart(4,'0');
+  const fcHex='0x'+fc.toString(16).toUpperCase().padStart(4,'0');
+  const ageColor=age===0?'var(--green)':age>30?'var(--red)':'var(--amber)';
+
+  document.getElementById('diag-row').innerHTML=`
+<div class="diag-card">
+  <div class="diag-title">STATUS REGISTER</div>
+  <div class="diag-addr">REG 14 · ${stHex} (dec ${st})</div>
+  ${binVisual(st,bits14,true)}
+  <div class="bits-wrap">${bitPills(st,bits14,false)}</div>
+</div>
+<div class="diag-card">
+  <div class="diag-title">FAULT CODE REGISTER</div>
+  <div class="diag-addr">REG 18 · ${fcHex} (dec ${fc})</div>
+  ${binVisual(fc,bits18,false)}
+  <div class="bits-wrap">${bitPills(fc,bits18,true)}</div>
+</div>
+<div class="diag-card">
+  <div class="diag-title">UPTIME</div>
+  <div class="diag-addr">REG 15 (LO) + REG 16 (HI)</div>
+  <div class="diag-main">${up}s</div>
+  <div class="diag-sub">LO word: ${regs[15]} &nbsp;·&nbsp; HI word: ${regs[16]}</div>
+  <div class="diag-sub" style="margin-top:4px;">combined = (HI × 65536) + LO</div>
+</div>
+<div class="diag-card">
+  <div class="diag-title">DATA AGE</div>
+  <div class="diag-addr">REG 17 · fault cycle counter</div>
+  <div class="diag-main" style="color:${ageColor}">${age}</div>
+  <div class="diag-sub">${age===0?'all clear — fresh data':age>30?'STALE — sensor dead':'fault active · '+age+' cycles'}</div>
+</div>`;
+}
+
+function renderAll(regs){
+  let wHtml='',wFault=false;
+  wDefs.forEach(d=>{if(regs[d.a]===FAULT)wFault=true;wHtml+=regRow(d,regs[d.a]);});
+  document.getElementById('water-panel').innerHTML=wHtml;
+  const wb=document.getElementById('wp-badge');
+  wb.textContent=wFault?'FAULT':S.warmup?'WARMUP':'ALL OK';
+  wb.className='panel-badge '+(wFault?'badge-fault':S.warmup?'badge-warn':'badge-ok');
+
+  let aHtml='',aFault=false;
+  aDefs.forEach(d=>{if(regs[d.a]===FAULT)aFault=true;aHtml+=regRow(d,regs[d.a]);});
+  document.getElementById('air-panel').innerHTML=aHtml;
+  const ab=document.getElementById('ap-badge');
+  ab.textContent=aFault?'FAULT':S.warmup?'WARMUP':'ALL OK';
+  ab.className='panel-badge '+(aFault?'badge-fault':S.warmup?'badge-warn':'badge-ok');
+
+  renderDiag(regs);
+
+  const f=S.faults,anyF=f.ph||f.tds||f.turb||f.air||f.adc;
+  const ks=document.getElementById('kv-state'),kp=document.getElementById('kpi-state');
+  if(S.warmup){ks.textContent='WARMUP';ks.className='kpi-value warn';kp.className='kpi kpi-warn';}
+  else if(anyF){ks.textContent='FAULT';ks.className='kpi-value fault';kp.className='kpi kpi-fault';}
+  else{ks.textContent='RUNNING';ks.className='kpi-value ok';kp.className='kpi kpi-ok';}
+  document.getElementById('kv-up').textContent=S.uptime+'s';
+  const ka=document.getElementById('kv-age'),kap=document.getElementById('kpi-age');
+  ka.textContent=S.dataAge;
+  if(S.dataAge===0){ka.className='kpi-value ok';kap.className='kpi kpi-ok';}
+  else if(S.dataAge>30){ka.className='kpi-value fault';kap.className='kpi kpi-fault';}
+  else{ka.className='kpi-value warn';kap.className='kpi kpi-warn';}
+  document.getElementById('kv-tx').textContent=S.tx;
+  document.getElementById('kv-err').textContent=S.err;
+  document.getElementById('ft-tx').textContent=`Tx = ${S.tx} : Err = ${S.err} : ID = 1 : F = 03 : SR = 2000ms`;
+  document.getElementById('ft-time').textContent=new Date().toLocaleTimeString('en-IN',{hour12:false})+' IST';
+}
+
+function blinkLED(){
+  const f=S.faults,anyF=f.ph||f.tds||f.turb||f.air||f.adc;
+  S.ledOn=!S.ledOn;
+  const led=document.getElementById('led'),bd=document.getElementById('bd'),txt=document.getElementById('led-txt');
+  if(S.warmup){led.className='led off';bd.style.background='var(--border2)';bd.style.boxShadow='none';txt.textContent='warmup';}
+  else if(anyF){led.className=S.ledOn?'led a':'led off';bd.style.background=S.ledOn?'var(--amber)':'var(--border2)';bd.style.boxShadow=S.ledOn?'0 0 6px var(--amber)':'none';txt.textContent='fault (4Hz)';}
+  else{led.className=S.ledOn?'led g':'led off';bd.style.background=S.ledOn?'var(--green)':'var(--border2)';bd.style.boxShadow=S.ledOn?'0 0 6px var(--green)':'none';txt.textContent='running (1Hz)';}
+  const f2=S.faults,anyF2=f2.ph||f2.tds||f2.turb||f2.air||f2.adc;
+  setTimeout(blinkLED,anyF2?250:500);
+}
+
+function tick(){
+  S.uptime+=2;S.tx++;
+  const f=S.faults,anyF=f.ph||f.tds||f.turb||f.air||f.adc;
+  if(anyF&&!S.warmup){S.dataAge++;S.err=Math.min(S.err+1,Math.floor(S.tx*.08));}
+  else S.dataAge=0;
+  if(S.scenario==='recover'&&S.recovering){
+    S.recoverStep++;
+    if(S.recoverStep===3)S.faults.tds=0;
+    if(S.recoverStep===5)S.faults.air=0;
+    if(S.recoverStep===8){S.faults.ph=0;S.recovering=false;}
+  }
+  renderAll(getRegs());syncCbs();
+}
+
+function setScenario(sc){
+  S.scenario=sc;S.recovering=false;S.recoverStep=0;S.warmup=false;
+  document.querySelectorAll('.sbtn').forEach(b=>b.className='sbtn');
+  const m={normal:{ph:0,tds:0,turb:0,air:0,adc:0},warmup:{ph:0,tds:0,turb:0,air:0,adc:0},
+    tds:{ph:0,tds:1,turb:0,air:0,adc:0},ph:{ph:1,tds:0,turb:0,air:0,adc:0},
+    turb:{ph:0,tds:0,turb:1,air:0,adc:0},air:{ph:0,tds:0,turb:0,air:1,adc:0},
+    adc:{ph:1,tds:1,turb:1,air:0,adc:1},all:{ph:1,tds:1,turb:1,air:1,adc:1},
+    recover:{ph:1,tds:1,turb:0,air:1,adc:0}};
+  S.faults=Object.assign({},m[sc]||m.normal);
+  if(sc==='warmup')S.warmup=true;
+  if(sc==='recover'){S.recovering=true;S.recoverStep=0;}
+  const anyF=Object.values(S.faults).some(v=>v);
+  const el=document.getElementById('sc-'+sc);
+  if(el)el.className='sbtn '+(sc==='warmup'?'s-warn':anyF?'s-fault':'s-ok');
+  tick();
+}
+
+function manualFault(){
+  S.scenario='manual';
+  document.querySelectorAll('.sbtn').forEach(b=>b.className='sbtn');
+  S.faults.ph=document.getElementById('f-ph').checked?1:0;
+  S.faults.tds=document.getElementById('f-tds').checked?1:0;
+  S.faults.turb=document.getElementById('f-turb').checked?1:0;
+  S.faults.air=document.getElementById('f-air').checked?1:0;
+  S.faults.adc=document.getElementById('f-adc').checked?1:0;
+  S.warmup=false;tick();
+}
+
+function syncCbs(){
+  document.getElementById('f-ph').checked=!!S.faults.ph;
+  document.getElementById('f-tds').checked=!!S.faults.tds;
+  document.getElementById('f-turb').checked=!!S.faults.turb;
+  document.getElementById('f-air').checked=!!S.faults.air;
+  document.getElementById('f-adc').checked=!!S.faults.adc;
+}
+
+setScenario('normal');
+setInterval(tick,2000);
+blinkLED();
+</script>
